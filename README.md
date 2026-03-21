@@ -1,14 +1,14 @@
-# GitHub Pages 个人主页模板
+# GitHub Pages 个人主页
 
-这个仓库是一个可直接部署的 GitHub Pages 静态页面模板。
+这个仓库现在使用 `GitHub Pages + Jekyll` 生成页面，内容主要由 Markdown 和布局模板组成。
 
-## 使用前先替换
+## 当前结构
 
-把下面这些占位内容替换成你自己的信息：
-
-- `your-username`
-- `you@example.com`
-- 项目列表与简介文字
+- `_config.yml`：Jekyll 站点配置
+- `_layouts/`：页面布局模板
+- `index.md`：主页内容
+- `multimodal/index.md`：多模态理解列表页
+- `multimodal/qwen3-vl.md`：文章内容
 
 ## 发布到 GitHub
 
@@ -28,7 +28,7 @@ git remote add origin https://github.com/<你的用户名>/<你的用户名>.git
 git push -u origin main
 ```
 
-推送后通常 1-2 分钟即可访问。
+推送后通常 1-2 分钟即可访问，GitHub Pages 会自动构建 Jekyll 页面。
 
 ### 方式 2：项目主页
 
@@ -43,4 +43,10 @@ git push -u origin main
 
 ## 本地预览
 
-这是纯静态页面，直接双击 `index.html` 即可预览。
+如果本机安装了 Ruby / Jekyll，可以在仓库目录执行：
+
+```bash
+bundle exec jekyll serve
+```
+
+然后访问本地预览地址。

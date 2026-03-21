@@ -1,4 +1,14 @@
-# Qwen3-VL 学习笔记
+---
+layout: article
+title: Qwen3-VL 学习笔记 | 多模态理解
+description: 围绕 Qwen3-VL 的论文要点、训练设计与代码理解整理。
+section_url: /multimodal/
+section_label: 多模态理解
+article_title: Qwen3-VL 学习笔记
+article_subtitle: 围绕 Qwen3-VL 的论文要点、训练设计与代码理解整理。
+article_type: 学习笔记
+article_topic: Qwen3-VL
+---
 
 ## contributions
 
