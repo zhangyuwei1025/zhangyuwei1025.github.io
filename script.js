@@ -26,12 +26,7 @@ async function renderMarkdownArticle(container) {
     }
 
     const markdown = await response.text();
-
-    if (!window.marked) {
-      throw new Error("Marked is not available.");
-    }
-
-    container.innerHTML = window.marked.parse(markdown);
+    container.innerHTML = renderMarkdown(markdown);
 
     if (markdownStatus) {
       markdownStatus.hidden = true;
@@ -52,6 +47,147 @@ async function renderMarkdownArticle(container) {
 
     console.error(error);
   }
+}
+
+function renderMarkdown(markdown) {
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+  const html = [];
+  const paragraphLines = [];
+  const listStack = [];
+  let inCodeBlock = false;
+  let codeLines = [];
+  let codeLanguage = "";
+
+  function closeParagraph() {
+    if (!paragraphLines.length) {
+      return;
+    }
+
+    html.push(`<p>${renderParagraph(paragraphLines)}</p>`);
+    paragraphLines.length = 0;
+  }
+
+  function closeLists(targetLevel = 0) {
+    while (listStack.length > targetLevel) {
+      html.push("</li></ul>");
+      listStack.pop();
+    }
+  }
+
+  function closeCodeBlock() {
+    if (!inCodeBlock) {
+      return;
+    }
+
+    const languageClass = codeLanguage ? ` class="language-${escapeHtml(codeLanguage)}"` : "";
+    html.push(`<pre><code${languageClass}>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+    inCodeBlock = false;
+    codeLines = [];
+    codeLanguage = "";
+  }
+
+  for (const line of lines) {
+    const fenceMatch = line.match(/^```([\w-]*)\s*$/);
+    if (fenceMatch) {
+      closeParagraph();
+      closeLists();
+
+      if (inCodeBlock) {
+        closeCodeBlock();
+      } else {
+        inCodeBlock = true;
+        codeLanguage = fenceMatch[1];
+        codeLines = [];
+      }
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeLines.push(line);
+      continue;
+    }
+
+    if (!line.trim()) {
+      closeParagraph();
+      continue;
+    }
+
+    if (/^\s*---+\s*$/.test(line)) {
+      closeParagraph();
+      closeLists();
+      html.push("<hr>");
+      continue;
+    }
+
+    const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      closeParagraph();
+      closeLists();
+      const level = headingMatch[1].length;
+      html.push(`<h${level}>${renderInline(headingMatch[2].trim())}</h${level}>`);
+      continue;
+    }
+
+    const listMatch = line.match(/^(\s*)-\s+(.*)$/);
+    if (listMatch) {
+      closeParagraph();
+      const level = Math.floor(listMatch[1].replace(/\t/g, "    ").length / 4) + 1;
+
+      while (listStack.length < level) {
+        html.push("<ul><li>");
+        listStack.push(level);
+      }
+
+      while (listStack.length > level) {
+        html.push("</li></ul>");
+        listStack.pop();
+      }
+
+      if (html[html.length - 1] !== "<ul><li>") {
+        html.push("</li><li>");
+      }
+
+      html.push(renderInline(listMatch[2].trim()));
+      continue;
+    }
+
+    closeLists();
+    paragraphLines.push(line);
+  }
+
+  closeParagraph();
+  closeLists();
+  closeCodeBlock();
+
+  return html.join("");
+}
+
+function renderParagraph(lines) {
+  const parts = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    parts.push(renderInline(trimmed));
+
+    if (index < lines.length - 1) {
+      const separator = line.endsWith("  ") ? "<br>" : " ";
+      parts.push(separator);
+    }
+  }
+
+  return parts.join("");
+}
+
+function renderInline(text) {
+  return escapeHtml(text)
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
 }
 
 function escapeHtml(value) {
