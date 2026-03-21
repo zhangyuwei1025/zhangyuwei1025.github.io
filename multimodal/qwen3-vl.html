@@ -8,27 +8,39 @@
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-  <header class="hero">
-    <h1>Qwen3-VL 学习笔记</h1>
-    <p class="subtitle">内容来源：Qwen3-VL.pdf，已转换为 Markdown。</p>
-    <a class="btn" href="./qwen3-vl.md">打开 Markdown 原文</a>
+  <header class="hero article-hero">
+    <div class="container article-hero-inner">
+      <p class="breadcrumb">
+        <a href="../index.html">首页</a>
+        <span>/</span>
+        <a href="./index.html">多模态理解</a>
+      </p>
+      <h1>Qwen3-VL 学习笔记</h1>
+      <p class="subtitle">围绕 Qwen3-VL 的论文要点、训练设计与代码理解整理。</p>
+      <p class="article-meta">
+        <span>学习笔记</span>
+        <span>Qwen3-VL</span>
+        <a href="./qwen3-vl.md">查看原文</a>
+      </p>
+    </div>
   </header>
 
   <main class="container">
-    <section class="card">
-      <h2>阅读方式</h2>
-      <p>
-        你可以点击上方按钮查看 Markdown 文件，或在仓库中直接打开
-        <code>multimodal/qwen3-vl.md</code>。
-      </p>
-      <p><a href="./index.html">返回多模态理解</a></p>
+    <section class="card article-card">
+      <p class="article-status" data-markdown-status hidden></p>
+      <article class="markdown-body" data-markdown-src="./qwen3-vl.md"></article>
     </section>
+
+    <nav class="article-nav">
+      <a href="./index.html">返回多模态理解</a>
+    </nav>
   </main>
 
   <footer>
     <p>© <span id="year"></span> 张雨薇. Built with GitHub Pages.</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="../script.js"></script>
 </body>
 </html>
