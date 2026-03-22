@@ -8,62 +8,6 @@ article_title: Qwen3-VL 学习笔记
 article_subtitle: 围绕 Qwen3-VL 的论文要点、训练设计与代码理解整理。
 article_type: 学习笔记
 article_topic: Qwen3-VL
-article_toc:
-  - title: contributions
-    id: contributions
-    children:
-      - title: Interleaved-MRoPE
-        id: interleaved-mrope
-      - title: DeepStack
-        id: deepstack
-      - title: textual timestamp
-        id: textual-timestamp
-      - title: training data
-        id: training-data
-      - title: training pipeline
-        id: training-pipeline
-      - title: benchmark
-        id: benchmark
-  - title: 代码
-    id: code
-    children:
-      - title: processor
-        id: processor
-      - title: vision model
-        id: vision-model
-      - title: patch_embed
-        id: patch-embed
-      - title: fast_pos_embed_interpolate
-        id: fast-pos-embed-interpolate
-      - title: rot_pos_emb
-        id: rot-pos-emb
-      - title: VisionBlock-attn
-        id: visionblock-attn
-      - title: attn_weights
-        id: attn-weights
-      - title: VisionBlock-mlp
-        id: visionblock-mlp
-      - title: PatchMerger
-        id: patchmerger
-      - title: 整理
-        id: vision-summary
-  - title: TextModel
-    id: text-model
-    children:
-      - title: 输入信息
-        id: text-model-inputs
-      - title: causal mask
-        id: causal-mask
-      - title: MRoPE
-        id: text-model-mrope
-      - title: Attention
-        id: text-model-attention
-      - title: FFN
-        id: text-model-ffn
-      - title: deepstack_process
-        id: deepstack-process
-      - title: head
-        id: text-model-head
 ---
 
 ## contributions {#contributions}
@@ -122,9 +66,7 @@ ViT 中不同层的视觉 token，残差连接到相应的 LLM 层。
 
 通用视频理解（VideoMME, MVBench）、时间视频接地（Charades-STA）、视频推理（VideoMMMU, MMVU）以及长视频理解（LVBench, MLVU）。
 
-## 代码 {#code}
-
-### processor {#processor}
+## processor {#processor}
 
 processor 主要针对视频和图像，进行以下操作：
 
@@ -159,7 +101,7 @@ for item in batch:
     messages.append(message)
 ```
 
-### vision model {#vision-model}
+## vision model {#vision-model}
 
 ```python
 inputs = self.processor.apply_chat_template(
@@ -259,7 +201,7 @@ w [1,1, 0,1,2, 3,4,3,4, 7,8,7,8,7,8,7,8]
 
 ---
 
-### TextModel {#text-model}
+## TextModel {#text-model}
 
 #### 输入信息 {#text-model-inputs}
 

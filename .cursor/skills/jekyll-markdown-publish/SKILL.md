@@ -23,7 +23,7 @@ When the user adds a new markdown article or asks to publish one:
 1. Read the target markdown file and relevant parent pages.
 2. Normalize the markdown structure so Jekyll/Kramdown renders it cleanly.
 3. Add or update front matter on the article.
-4. Add or update the article's left-side table of contents when the article is long enough to need one.
+4. Ensure the article's left-side table of contents can be auto-generated from markdown headings.
 5. Add or update the parent section entry button/link.
 6. Add or update homepage entry points if the user expects section-level navigation from the homepage.
 7. Check for stale files or old logic and remove them if no longer needed.
@@ -62,20 +62,15 @@ Keep the visible article title in front matter. If the markdown body also begins
 
 ### Article TOC Pattern
 
-Long articles should include a left-side table of contents via front matter:
+The current repository convention is:
 
-```yaml
-article_toc:
-  - title: Section A
-    id: section-a
-    children:
-      - title: Subsection A1
-        id: subsection-a1
-      - title: Subsection A2
-        id: subsection-a2
-```
+- TOC is rendered in the article layout on the left side on desktop
+- TOC collapses above the article on narrow screens
+- TOC itself should be collapsible, typically via `details/summary`
+- TOC is auto-generated from article headings
+- Prefer meaningful `h2`, `h3`, and `h4` structure so the TOC remains readable
 
-Use stable ASCII ids whenever possible, even for Chinese headings. Then add matching heading attributes in the markdown body:
+Use explicit heading ids only when needed for stable anchors or cleaner links:
 
 ```markdown
 ## 代码 {#code}
@@ -83,12 +78,7 @@ Use stable ASCII ids whenever possible, even for Chinese headings. Then add matc
 #### PatchMerger {#patchmerger}
 ```
 
-The current repository convention is:
-
-- TOC is rendered in the article layout on the left side on desktop
-- TOC collapses above the article on narrow screens
-- TOC itself should be collapsible, typically via `details/summary`
-- TOC should list meaningful sections only; do not dump every tiny heading unless the article truly benefits from it
+Do not manually maintain a large `article_toc` block in front matter unless the user explicitly asks for hand-curated TOC labels.
 
 ### Section Entry Pattern
 
@@ -127,7 +117,7 @@ Prefer markdown that renders reliably in Jekyll/Kramdown:
 - Add blank lines before subheadings
 - Keep inline code wrapped in backticks
 - Keep long technical sections as `####` headings plus bullet lists when that reads more clearly than deeply nested bullets
-- Add explicit heading ids for any heading that will appear in the left TOC
+- Add explicit heading ids only when auto-generated ids would be unclear or unstable
 
 ### Preferred Transformations
 
