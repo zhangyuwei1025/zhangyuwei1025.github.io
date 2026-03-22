@@ -132,10 +132,31 @@ body {
 }
 
 .article-toc-title {
-  margin: 0 0 0.8rem;
+  margin: 0;
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.article-toc-title::-webkit-details-marker {
+  display: none;
+}
+
+.article-toc-title::before {
+  content: "▾";
+  display: inline-block;
+  margin-right: 0.45rem;
+  transition: transform 0.2s ease;
+}
+
+.article-toc-card:not([open]) .article-toc-title::before {
+  transform: rotate(-90deg);
+}
+
+.article-toc-card[open] .article-toc-list {
+  margin-top: 0.8rem;
 }
 
 .article-toc-list,

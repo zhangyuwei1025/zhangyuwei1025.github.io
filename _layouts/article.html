@@ -20,8 +20,8 @@ layout: default
 <main class="container article-layout">
   {% if page.article_toc %}
   <aside class="article-toc">
-    <div class="card article-toc-card">
-      <p class="article-toc-title">目录</p>
+    <details class="card article-toc-card" open>
+      <summary class="article-toc-title">目录</summary>
       <ul class="article-toc-list">
         {% for item in page.article_toc %}
         <li>
@@ -36,7 +36,7 @@ layout: default
         </li>
         {% endfor %}
       </ul>
-    </div>
+    </details>
   </aside>
   {% endif %}
 

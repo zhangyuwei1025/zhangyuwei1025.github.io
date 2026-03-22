@@ -87,6 +87,7 @@ The current repository convention is:
 
 - TOC is rendered in the article layout on the left side on desktop
 - TOC collapses above the article on narrow screens
+- TOC itself should be collapsible, typically via `details/summary`
 - TOC should list meaningful sections only; do not dump every tiny heading unless the article truly benefits from it
 
 ### Section Entry Pattern
