@@ -10,9 +10,9 @@ article_type: 学习笔记
 article_topic: Qwen3-VL
 ---
 
-## contributions {#contributions}
+## Contributions {#contributions}
 
-- interleaved-MRoPE
+- Interleaved-MRoPE
 - DeepStack in ViT
 - textual timestamp in video
 - square-root reweighting，提高多模态能力的同时不损失文本能力
