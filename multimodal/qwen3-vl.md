@@ -8,9 +8,65 @@ article_title: Qwen3-VL 学习笔记
 article_subtitle: 围绕 Qwen3-VL 的论文要点、训练设计与代码理解整理。
 article_type: 学习笔记
 article_topic: Qwen3-VL
+article_toc:
+  - title: contributions
+    id: contributions
+    children:
+      - title: Interleaved-MRoPE
+        id: interleaved-mrope
+      - title: DeepStack
+        id: deepstack
+      - title: textual timestamp
+        id: textual-timestamp
+      - title: training data
+        id: training-data
+      - title: training pipeline
+        id: training-pipeline
+      - title: benchmark
+        id: benchmark
+  - title: 代码
+    id: code
+    children:
+      - title: processor
+        id: processor
+      - title: vision model
+        id: vision-model
+      - title: patch_embed
+        id: patch-embed
+      - title: fast_pos_embed_interpolate
+        id: fast-pos-embed-interpolate
+      - title: rot_pos_emb
+        id: rot-pos-emb
+      - title: VisionBlock-attn
+        id: visionblock-attn
+      - title: attn_weights
+        id: attn-weights
+      - title: VisionBlock-mlp
+        id: visionblock-mlp
+      - title: PatchMerger
+        id: patchmerger
+      - title: 整理
+        id: vision-summary
+  - title: TextModel
+    id: text-model
+    children:
+      - title: 输入信息
+        id: text-model-inputs
+      - title: causal mask
+        id: causal-mask
+      - title: MRoPE
+        id: text-model-mrope
+      - title: Attention
+        id: text-model-attention
+      - title: FFN
+        id: text-model-ffn
+      - title: deepstack_process
+        id: deepstack-process
+      - title: head
+        id: text-model-head
 ---
 
-## contributions
+## contributions {#contributions}
 
 - interleaved-MRoPE
 - DeepStack in ViT
@@ -20,7 +76,7 @@ article_topic: Qwen3-VL
 - 后训练增加 thinking & no thinking 两种
 - MoE & Dense（主要是语言模型有这种规格）
 
-### Interleaved-MRoPE
+### Interleaved-MRoPE {#interleaved-mrope}
 
 在 Qwen2.5 中，对于视频，positional embedding 划分为 3 个部分，每个部分分别计算 t/h/w 的位置编码，即：
 
@@ -35,16 +91,16 @@ tttt...hhhh....www.....
 thwthwthw...
 ```
 
-### DeepStack
+### DeepStack {#deepstack}
 
 ViT 中不同层的视觉 token，残差连接到相应的 LLM 层。  
 消融实验证明有效。
 
-### textual timestamp
+### textual timestamp {#textual-timestamp}
 
 取消 Qwen2.5-VL 中的绝对时间对齐，直接用文本表示时间戳，`HH:MM:SS` 和 `4.0s` 两种格式。
 
-### training data
+### training data {#training-data}
 
 如何筛选不同难度的数据？
 
@@ -53,7 +109,7 @@ ViT 中不同层的视觉 token，残差连接到相应的 LLM 层。
 
 蒸馏：先做离线蒸馏（数据蒸馏）再做在线蒸馏，最小化与 teacher 模型的 KL 散度。
 
-### training pipeline
+### training pipeline {#training-pipeline}
 
 **预训练**分为四个阶段：热身对齐阶段（仅更新视觉语言投影层，冻结模型其余部分），随后是全参数训练，其上下文窗口逐步扩大到 `8K`、`32K` 和 `256K`。  
 **后训练**包括三个阶段：
@@ -62,13 +118,13 @@ ViT 中不同层的视觉 token，残差连接到相应的 LLM 层。
 - 来自更强教师模型的知识蒸馏；
 - 强化学习。
 
-### benchmark
+### benchmark {#benchmark}
 
 通用视频理解（VideoMME, MVBench）、时间视频接地（Charades-STA）、视频推理（VideoMMMU, MMVU）以及长视频理解（LVBench, MLVU）。
 
-## 代码
+## 代码 {#code}
 
-### processor
+### processor {#processor}
 
 processor 主要针对视频和图像，进行以下操作：
 
@@ -103,7 +159,7 @@ for item in batch:
     messages.append(message)
 ```
 
-### vision model
+### vision model {#vision-model}
 
 ```python
 inputs = self.processor.apply_chat_template(
@@ -117,7 +173,7 @@ inputs = self.processor.apply_chat_template(
 inputs = inputs.to(self.model.device)
 ```
 
-#### patch_embed
+#### patch_embed {#patch-embed}
 
 输入是 `pixel_values`。
 
@@ -126,7 +182,7 @@ inputs = inputs.to(self.model.device)
 - 所以做完之后，是 `N * H * 1 * 1 * 1`，最后 view 成 `N * H`：`hidden_states`
 - 注意，这里的 N 内部是按照 `2 * 2 (merge_size=2)` 内部先排列，然后遍历每 4 个的顺序
 
-#### fast_pos_embed_interpolate
+#### fast_pos_embed_interpolate {#fast-pos-embed-interpolate}
 
 输入是 `grid_thw`。
 
@@ -137,7 +193,7 @@ inputs = inputs.to(self.model.device)
 - 结果相加 `hidden_states = hidden_states + pos_embeds`，这是将要进入每个 block 的 `hidden_states`
 - 注意，这个绝对的空间位置编码仅使用一次：在进入每个 block 之前，加在算完卷积的特征上
 
-#### rot_pos_emb
+#### rot_pos_emb {#rot-pos-emb}
 
 输入是 `grid_thw`。
 
@@ -147,7 +203,7 @@ inputs = inputs.to(self.model.device)
 - 得到 `rotary_pos_emb: [seq_len * head_dim]`（某种相位）
 - 计算 cos 和 sin 值，在之后每个 block 都用来旋转 q 和 k
 
-#### VisionBlock-attn
+#### VisionBlock-attn {#visionblock-attn}
 
 输入是 `hidden_states: [seq_len, hidden_dims]`。
 
@@ -155,7 +211,7 @@ inputs = inputs.to(self.model.device)
 - 计算 qkv，分别都是 `seq_len * num_heads * head_dims`
 - 应用 RoPE（需要在 fp32 上计算），两两一组乘以旋转矩阵（cos 和 sin 构造而来），得到旋转后的 q 和 k
 
-#### attn_weights
+#### attn_weights {#attn-weights}
 
 只做帧内注意力，帧与帧之间不算，通过 `cu_seqlen` 保证。
 
@@ -165,7 +221,7 @@ inputs = inputs.to(self.model.device)
 - 上述两种 attn 实现都直接输出 `attn_weights * V` 的结果
 - 做 output project，然后残差连接，得到 `hidden_states`
 
-#### VisionBlock-mlp
+#### VisionBlock-mlp {#visionblock-mlp}
 
 输入是 `hidden_states: [seq_len, hidden_dims]`。
 
@@ -175,7 +231,7 @@ inputs = inputs.to(self.model.device)
 - `Linear(intermediate_size, hidden_size)` 降维回到原维度
 - 计算残差连接，得到 `hidden_states`
 
-#### PatchMerger
+#### PatchMerger {#patchmerger}
 
 输入是中间层或最后一层的 `hidden_states`，中间层是 deepstack 机制。
 
@@ -184,7 +240,7 @@ inputs = inputs.to(self.model.device)
 - `Linear(hidden_size, hidden_size) + 激活 + Linear(hidden_size, out_hidden_size)`
 - 前两步是在做 merge，最后一步是 MLP 连接器
 
-#### 整理
+#### 整理 {#vision-summary}
 
 - 准备 `input_embeds`：把 `inputs_embeds` 中 vision 占位符的位置替换为 vision model 实际算出的 `vision_embeds`
 - 准备 `vision_pos_mask` 和 `deepstack_visual_embeds`：如果同时有视频和图像，需要将 `deepstack_vision_embeds` 拼接到一起；单图像和单视频不用特殊处理
@@ -203,9 +259,9 @@ w [1,1, 0,1,2, 3,4,3,4, 7,8,7,8,7,8,7,8]
 
 ---
 
-### TextModel
+### TextModel {#text-model}
 
-#### 输入信息
+#### 输入信息 {#text-model-inputs}
 
 - `position_ids`
 - `attention_mask`（具体是左 padding 的 mask）
@@ -215,18 +271,18 @@ w [1,1, 0,1,2, 3,4,3,4, 7,8,7,8,7,8,7,8]
 - `visual_pos_masks`（标记哪些位置是视觉部分）
 - `deepstack_visual_embeds`（ViT 某些层拿到的 embedding）
 
-#### causal mask
+#### causal mask {#causal-mask}
 
 - 添加 `causal_mask`，更新 `attention_mask`：pad 行列全 0，其余部分下三角矩阵
 
-#### MRoPE
+#### MRoPE {#text-model-mrope}
 
 - 先分别计算 thw 三个数字对应的 freqs 向量
 - 将 pos_id 从 `[TTT...HHH...WWW]` 转成 interleaved `[THTHWHTHW...TT]`，按这个排列顺序将对应 freqs 填进来
 - thw 三者的分配比例是 `[24, 20, 20]`，先按 thw 交替做，多余的 t 都在最后
 - 得到的 `position_embeddings` 会在后续每个 decoder layer 使用
 
-#### Attention
+#### Attention {#text-model-attention}
 
 - 有 pre-norm，是 RMSNorm，在 hidden_dim 维度上做
 - 支持传入 `num_attention_heads`，可支持 MHA / GQA / MQA
@@ -234,7 +290,7 @@ w [1,1, 0,1,2, 3,4,3,4, 7,8,7,8,7,8,7,8]
 - kv-cache 更新，有一个 Cache 类，有 `update` 方法
 - 最后做残差连接
 
-#### FFN
+#### FFN {#text-model-ffn}
 
 - 有 pre-norm，代码里写的是 post-attn-layernorm
 - 非 moe 版本：普通 SwiGLU，`down_proj(act_fn(gate_proj(x) * up_proj(x)))`，一般 up 到 `4 * hidden_size`，down 回 `hidden_size`
@@ -250,10 +306,10 @@ w [1,1, 0,1,2, 3,4,3,4, 7,8,7,8,7,8,7,8]
         - 推理时这样更快，减少 latency
 - 最后做残差连接
 
-#### deepstack_process
+#### deepstack_process {#deepstack-process}
 
 - 指定层才做，把之前存好的 vision embedding 以残差连接方式加在当前 vision 部分的 `hidden_states` 上
 
-#### head
+#### head {#text-model-head}
 
 - 做下一个 token 预测：`nn.Linear(hidden_size, vocab_size)`。

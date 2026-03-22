@@ -23,13 +23,14 @@ When the user adds a new markdown article or asks to publish one:
 1. Read the target markdown file and relevant parent pages.
 2. Normalize the markdown structure so Jekyll/Kramdown renders it cleanly.
 3. Add or update front matter on the article.
-4. Add or update the parent section entry button/link.
-5. Add or update homepage entry points if the user expects section-level navigation from the homepage.
-6. Check for stale files or old logic and remove them if no longer needed.
-7. Run lints for changed files when applicable.
-8. Commit only when the user asks.
-9. Push only when the user asks.
-10. Verify the live page after push with a web fetch.
+4. Add or update the article's left-side table of contents when the article is long enough to need one.
+5. Add or update the parent section entry button/link.
+6. Add or update homepage entry points if the user expects section-level navigation from the homepage.
+7. Check for stale files or old logic and remove them if no longer needed.
+8. Run lints for changed files when applicable.
+9. Commit only when the user asks.
+10. Push only when the user asks.
+11. Verify the live page after push with a web fetch.
 
 ## Repository Conventions
 
@@ -58,6 +59,35 @@ article_topic: Topic Name
 ```
 
 Keep the visible article title in front matter. If the markdown body also begins with the same `# Title`, remove the duplicate heading unless the user specifically wants it repeated.
+
+### Article TOC Pattern
+
+Long articles should include a left-side table of contents via front matter:
+
+```yaml
+article_toc:
+  - title: Section A
+    id: section-a
+    children:
+      - title: Subsection A1
+        id: subsection-a1
+      - title: Subsection A2
+        id: subsection-a2
+```
+
+Use stable ASCII ids whenever possible, even for Chinese headings. Then add matching heading attributes in the markdown body:
+
+```markdown
+## 代码 {#code}
+### processor {#processor}
+#### PatchMerger {#patchmerger}
+```
+
+The current repository convention is:
+
+- TOC is rendered in the article layout on the left side on desktop
+- TOC collapses above the article on narrow screens
+- TOC should list meaningful sections only; do not dump every tiny heading unless the article truly benefits from it
 
 ### Section Entry Pattern
 
@@ -96,6 +126,7 @@ Prefer markdown that renders reliably in Jekyll/Kramdown:
 - Add blank lines before subheadings
 - Keep inline code wrapped in backticks
 - Keep long technical sections as `####` headings plus bullet lists when that reads more clearly than deeply nested bullets
+- Add explicit heading ids for any heading that will appear in the left TOC
 
 ### Preferred Transformations
 
@@ -136,7 +167,8 @@ After push, verify the live result:
 
 1. Fetch the homepage URL and confirm the relevant entry link exists.
 2. Fetch the article URL and confirm the page content is rendered, not just raw markdown fallback text.
-3. If the page still looks stale, note that GitHub Pages may take 1-2 minutes and recheck.
+3. If the article has a TOC, confirm the TOC heading labels are visible in the rendered page.
+4. If the page still looks stale, note that GitHub Pages may take 1-2 minutes and recheck.
 
 Use this verification checklist:
 
@@ -144,6 +176,7 @@ Use this verification checklist:
 - [ ] section page entry exists
 - [ ] article title is visible
 - [ ] main body content is visible
+- [ ] left-side TOC is visible when expected
 - [ ] no obvious old fallback text remains
 
 ## Commit and Push
@@ -168,6 +201,8 @@ For a new article in an existing section, expect to touch some of:
 - `section-name/index.md`
 - `index.md`
 - `README.md`
+- `_layouts/article.html`
+- `styles.css`
 
 For a new section, expect to touch some of:
 

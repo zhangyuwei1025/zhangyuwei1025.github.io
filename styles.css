@@ -115,6 +115,56 @@ body {
   border-radius: 1rem;
 }
 
+.article-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.article-toc {
+  position: sticky;
+  top: 1rem;
+}
+
+.article-toc-card {
+  padding: 1rem 1.1rem;
+}
+
+.article-toc-title {
+  margin: 0 0 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.article-toc-list,
+.article-toc-list ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.article-toc-list li + li {
+  margin-top: 0.35rem;
+}
+
+.article-toc-list ul {
+  margin-top: 0.45rem;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--border);
+}
+
+.article-toc-list a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.article-toc-list a:hover {
+  color: var(--primary);
+}
+
 .markdown-body {
   font-size: 1.02rem;
 }
@@ -234,4 +284,14 @@ footer {
   text-align: center;
   color: var(--muted);
   padding: 1.8rem 1rem 2.4rem;
+}
+
+@media (max-width: 900px) {
+  .article-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .article-toc {
+    position: static;
+  }
 }
